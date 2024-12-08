@@ -1,0 +1,1757 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מחשבון השקעות והלוואות 📈</title>
+    
+    <!-- ספריות חיצוניות -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+    <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/themes/light.css">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap');
+        
+        body { 
+            font-family: 'Rubik', sans-serif;
+            background-color: #f0f0f0;
+        }
+
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 15px;
+        }
+
+        .top-section {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .real-data-section {
+            flex: 2;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .non-market-investments {
+            flex: 1;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .input-container {
+ 	   display: grid;
+	    grid-template-columns: repeat(3, 1fr); /* Three equal columns */
+ 	   gap: 15px; /* Spacing between columns */
+ 	   padding: 10px;
+  	  background-color: #f9fafb; /* Optional: subtle background color */
+	    border-radius: 8px;
+  	  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Optional: light shadow */
+}
+
+        .input-group {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .data-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr auto auto;
+            gap: 4px;
+            align-items: center;
+            padding: 1px;
+            background-color: #f9fafb;
+            border-radius: 4px;
+            margin-bottom: 1px;
+	    min-height: 28px;
+        }
+
+        .btn {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background-color: #3b82f6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #2563eb;
+        }
+
+        .btn-secondary {
+            background-color: #9ca3af;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #6b7280;
+        }
+
+        /* תיבות תוצאה */
+        .result-box {
+            position: relative;
+            padding: 10px;
+            border-radius: 8px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .result-box:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        /* טבלה */
+        .table-container {
+            overflow-x: auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin: 15px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 8px;
+            text-align: right;
+            border: 1px solid #e5e7eb;
+            font-size: 0.9rem;
+        }
+
+        th {
+            background-color: #f3f4f6;
+            font-weight: 600;
+        }
+
+        /* גרף */
+        .chart-container {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin: 15px 0;
+            height: 500px;
+            width: 100%;
+        }
+
+        /* טולטיפים */
+        .tippy-box[data-theme~='custom'] {
+            background-color: white;
+            color: #1f2937;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-radius: 6px;
+            border: 1px solid #e5e7eb;
+            padding: 8px;
+            font-size: 14px;
+        }
+
+        /* שדות קלט */
+        input, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            transition: border-color 0.2s ease;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+        }
+
+        .input-with-icon {
+            position: relative;
+        }
+
+        .input-with-icon input {
+            padding-left: 30px;
+        }
+
+        .input-with-icon::after {
+            content: "₪";
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6b7280;
+        }
+
+        /* התאמות גרף */
+        .chart-section {
+            margin: 20px 0;
+        }
+
+        .chart-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        /* אנימציות */
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* עיצוב מיוחד לתמהיל השוואה */
+        .comparison-section {
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .comparison-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .comparison-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 10px;
+        }
+.hidden {
+    display: none;
+}
+
+#advancedSection {
+    transition: opacity 0.3s ease-in-out, max-height 0.3s ease-in-out;
+}
+
+#advancedSection:not(.hidden) {
+    display: flex;
+    opacity: 1;
+    max-height: 2000px;
+}
+
+.slide-down {
+    animation: slideDown 0.3s ease-out forwards;
+}
+
+.slide-up {
+    animation: slideUp 0.3s ease-out forwards;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        max-height: 0;
+    }
+    to {
+        opacity: 1;
+        max-height: 2000px;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 1;
+        max-height: 2000px;
+    }
+    to {
+        opacity: 0;
+        max-height: 0;
+    }
+}
+.action-button {
+    font-size: 20px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    font-weight: bold;
+    line-height: 1;
+    height: 32px;
+}
+
+/* סגנון ספציפי לכפתור הוספה */
+.add-button {
+    color: #3b82f6;  /* צבע כחול */
+}
+
+.add-button:hover {
+    color: #2563eb;
+    transform: scale(1.1);
+}
+
+/* סגנון ספציפי לכפתור מחיקה */
+.remove-button {
+    color: #ef4444;  /* צבע אדום */
+}
+
+.remove-button:hover {
+    color: #dc2626;
+    transform: scale(1.1);
+}
+
+/* אפקט לחיצה משותף */
+.action-button:active {
+    transform: scale(0.95);
+}
+.redemption-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 2fr auto auto;  /* חלוקה לעמודות */
+    gap: 4px;
+    align-items: center;
+    padding: 4px;
+    background-color: #f9fafb;
+    border-radius: 4px;
+    margin-bottom: 4px;
+}
+
+.redemption-fields {
+    display: contents;  /* מאפשר לילדים להתמקם ישירות בגריד */
+}
+
+.comparison-group {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.comparison-group label {
+    font-size: 0.875rem;
+    color: #4b5563;
+}
+
+
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-4">מחשבון השקעות והלוואות 📈</h1>
+        
+<div class="flex items-center mb-2">
+    <h2 class="text-lg font-bold ml-2">נתונים מתקדמים 📊</h2>
+    <button onclick="toggleAdvancedSection()" class="btn btn-secondary flex items-center gap-2 text-sm">
+        <span id="toggleButtonText">הצג</span>
+        <span id="toggleIcon" class="transform transition-transform duration-300">▼</span>
+    </button>
+</div>
+<div id="advancedSection" class="top-section hidden transition-all duration-300 ease-in-out" style="opacity: 0; max-height: 0; overflow: hidden;">            <!-- אזור נתוני אמת - 2/3 מהרוחב -->
+            <div class="real-data-section">
+                <div class="mb-2">
+                    <h3 class="text-lg font-bold mb-2">מוצרים פיננסיים ופנסיוניים 💰</h3>
+                    <div id="productsContainer">
+                        <div class="data-row">
+                            <select class="product-type w-full border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                                <option value="">בחר מוצר</option>
+                                <optgroup label="קרנות השתלמות">
+                                    <option value="keren_hishtalmut_sakhir">קרן השתלמות שכיר</option>
+                                    <option value="keren_hishtalmut_atzmai">קרן השתלמות עצמאי</option>
+                                </optgroup>
+                                <optgroup label="קופות גמל">
+                                    <option value="kupat_gemel">קופת גמל</option>
+                                    <option value="kupat_gemel_lehashkaa">קופת גמל להשקעה</option>
+                                </optgroup>
+                                <optgroup label="פנסיה וביטוח">
+                                    <option value="keren_pensia">קרן פנסיה</option>
+                                    <option value="bituach_menahalim">ביטוח מנהלים</option>
+                                </optgroup>
+                                <optgroup label="השקעות">
+                                    <option value="ira">IRA</option>
+                                    <option value="polisa_hisachon">פוליסת חיסכון</option>
+                                    <option value="current_account">עו"ש</option>
+                                    <option value="fixed_deposit">פק"מ</option>
+                                    <option value="money_market_fund">קרן כספית</option>
+                                    <option value="advised_portfolio">תיק מיועץ</option>
+                                    <option value="managed_portfolio">תיק מנוהל</option>
+                                </optgroup>
+                            </select>
+                            <div class="input-with-icon">
+                                <input type="number" class="savings-amount w-full border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                                    placeholder="גובה החיסכון" onchange="updateTotalInvestment()">
+                            </div>
+                            <select class="liquidity w-full border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                                <option value="yes">נזיל</option>
+                                <option value="no">לא נזיל</option>
+                            </select>
+                            <input type="number" class="years-to-liquidity w-full border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none" 
+                                placeholder="שנים לנזילות" style="display:none;">
+					<button onclick="addProduct()" class="action-button add-button">+</button>
+					<button onclick="removeProduct(this)" class="action-button remove-button" style="display:none;">-</button>
+
+                        </div>
+                    </div>
+                </div>
+
+<div class="mb-2">
+    <h3 class="text-lg font-bold mb-2">נתוני תזרים 💵</h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">
+                        <div class="input-with-icon">
+                            <label class="block text-sm text-gray-600 mb-1">הכנסה חודשית:</label>
+                            <input type="number" id="totalIncome" class="w-full border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none" 
+                                onchange="updateCashflow()">
+                        </div>
+                        <div class="input-with-icon">
+                            <label class="block text-sm text-gray-600 mb-1">הוצאה חודשית:</label>
+                            <input type="number" id="totalExpense" class="w-full border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none" 
+                                onchange="updateCashflow()">
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gray-50 p-3 rounded-lg">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-medium">תזרים פנוי:</span>
+                            <span id="availableCashFlow" class="font-bold"></span>
+                        </div>
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-medium">אחוז הקצאה להשקעה (%):</span>
+                            <div class="relative w-24">
+                                <input type="number" id="investmentAllocation" max="100"
+                                    class="w-full border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                                    onchange="updateInvestmentAmount()">
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm font-medium">סכום להשקעה חודשית:</span>
+                            <span id="investmentAmount" class="font-bold text-blue-600"></span>
+                        </div>
+                    </div>
+                </div>
+		<div class="mb-2">
+		    <h3 class="text-lg font-bold mb-2">הפקדות לחיסכון חודשי 📅</h3>
+                    <div id="monthlyDepositsContainer">
+                        <div class="data-row">
+                            <select class="deposit-product w-full border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                                <option value="">בחר מכשיר</option>
+                            </select>
+                            <div class="input-with-icon">
+                                <input type="number" class="deposit-amount w-full border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none" 
+                                    placeholder="סכום" onchange="validateDeposit(this)">
+                            </div>
+                            <input type="text" class="w-full border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none" 
+                                placeholder="מטרה">
+                            <button onclick="addDeposit()" class="action-button add-button">+</button>
+			    <button onclick="removeDeposit(this)" class="action-button remove-button" style="display:none;">-</button>
+                        </div>
+                    </div>
+                    <div id="totalDepositsDisplay" class="text-sm font-medium mt-2"></div>
+                </div>
+            </div>
+
+            <!-- אזור השקעות שאינן בשוק ההון - 1/3 מהרוחב -->
+            <div class="non-market-investments">
+                <h3 class="text-lg font-bold mb-2">השקעות שאינן בשוק ההון 🏢</h3>
+                <div class="grid gap-2">
+                    <div class="input-with-icon">
+                        <label class="block text-sm text-gray-600 mb-1">נדל"ן:</label>
+                        <input type="text" id="realEstateInvestment" class="w-full border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none" 
+                            onchange="formatNumber(this)">
+                    </div>
+                    <div class="input-with-icon">
+                        <label class="block text-sm text-gray-600 mb-1">אופציות:</label>
+                        <input type="text" id="optionsInvestment" class="w-full border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none" 
+                            onchange="formatNumber(this)">
+                    </div>
+                    <div class="input-with-icon">
+                        <label class="block text-sm text-gray-600 mb-1">מניות פרטיות:</label>
+                        <input type="text" id="privateStocksInvestment" class="w-full border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none" 
+                            onchange="formatNumber(this)">
+                    </div>
+                    <div class="input-with-icon">
+                        <label class="block text-sm text-gray-600 mb-1">השקעות אלטרנטיביות:</label>
+                        <input type="text" id="alternativeInvestment" class="w-full border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none" 
+                            onchange="formatNumber(this)">
+                    </div>
+                    <div class="input-with-icon">
+                        <label class="block text-sm text-gray-600 mb-1">אחר:</label>
+                        <input type="text" id="otherInvestment" class="w-full border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none" 
+                            onchange="formatNumber(this)">
+                    </div>
+                </div>
+            </div>
+        </div>
+<!-- אזור הזנת נתונים בסיסית -->
+        <div class="input-container">
+            <div class="input-group">
+                <h3 class="font-bold mb-3">נתוני השקעה בסיסיים 💼</h3>
+                <div class="mb-2">
+                    <label class="block text-sm text-gray-600 mb-1">סכום השקעה ראשוני:</label>
+                    <div class="input-with-icon">
+                        <input type="text" id="initialInvestment" value="100,000 ₪" 
+                            class="w-full border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none" 
+                            onchange="formatNumber(this)">
+                    </div>
+                </div>
+                <div class="mb-2">
+                    <label class="block text-sm text-gray-600 mb-1">סכום השקעה חודשי:</label>
+                    <div class="input-with-icon">
+                        <input type="text" id="monthlyInvestment" value="500 ₪" 
+                            class="w-full border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none" 
+                            onchange="formatNumber(this)">
+                    </div>
+                </div>
+                <div class="mb-2">
+                    <label class="block text-sm text-gray-600 mb-1">שנות השקעה:</label>
+                    <input type="number" id="investmentYears" value="15" min="1" max="50"
+                        class="w-full border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div class="mb-2">
+                    <label class="block text-sm text-gray-600 mb-1">תשואה שנתית (%):</label>
+                    <div class="relative">
+                        <input type="text" id="returnRate" value="8%" 
+                            class="w-full border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none" 
+                            onchange="formatPercentage(this)">
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <h3 class="font-bold mb-3">פרטי הלוואה 🏦</h3>
+                <div class="mb-2">
+                    <label class="block text-sm text-gray-600 mb-1">אחוז הלוואה:</label>
+                    <select id="loanPercentage" 
+                        class="w-full border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none" 
+                        onchange="updateLoanAmount()">
+                        <option value="0">0%</option>
+                        <option value="10">10%</option>
+                        <option value="20">20%</option>
+                        <option value="30">30%</option>
+                        <option value="40">40%</option>
+                        <option value="50">50%</option>
+                        <option value="60">60%</option>
+                        <option value="70" selected>70%</option>
+                        <option value="80">80%</option>
+                    </select>
+                    <div id="loanAmount" class="text-sm text-gray-600 mt-1"></div>
+                </div>
+                <div class="mb-2">
+                    <label class="block text-sm text-gray-600 mb-1">שנות הלוואה:</label>
+                    <input type="number" id="loanYears" value="7" min="1" max="30"
+                        class="w-full border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div class="mb-2">
+                    <label class="block text-sm text-gray-600 mb-1">סוג ההלוואה:</label>
+                    <select id="loanType" class="w-full border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <option value="balloon" selected>בלון 🎈</option>
+                        <option value="spitzer">שפיצר</option>
+                    </select>
+                </div>
+                <div class="mb-2">
+                    <label class="block text-sm text-gray-600 mb-1">ריבית הלוואה (%):</label>
+                    <div class="relative">
+                        <input type="text" id="loanInterest" value="2%" 
+                            class="w-full border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none" 
+                            onchange="formatPercentage(this)">
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <h3 class="font-bold mb-3">הגדרות נוספות ⚙️</h3>
+                <div class="mb-2">
+                    <label class="block text-sm text-gray-600 mb-1">סוג ההשקעה:</label>
+                    <select id="investmentType" class="w-full border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <option value="real_estate" selected>נדל"ן</option>
+                        <option value="stock_market">שוק ההון</option>
+                        <option value="alternative">אלטרנטיבי</option>
+                    </select>
+                </div>
+                <div class="mb-2">
+                    <label class="block text-sm text-gray-600 mb-1">תשואה שנתית ממינוף (%):</label>
+                    <div class="relative">
+                        <input type="text" id="loanReturnRate" value="5%" 
+                            class="w-full border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none" 
+                            onchange="formatPercentage(this)">
+                    </div>
+                </div>
+                <div class="mb-2">
+                    <label class="block text-sm text-gray-600 mb-1">חישוב ריבית דריבית:</label>
+                    <select id="compoundLoanReturn" class="w-full border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <option value="true" selected>כן</option>
+                        <option value="false">לא</option>
+                    </select>
+                </div>
+                <div class="mb-2">
+                    <label class="block text-sm text-gray-600 mb-1">אינפלציה שנתית (%):</label>
+                    <div class="relative">
+                        <input type="text" id="inflationRate" value="0%" 
+                            class="w-full border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none" 
+                            onchange="formatPercentage(this)">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- תמהיל השוואה -->
+        <div class="comparison-section">
+            <div class="comparison-header">
+                <div class="flex items-center gap-4">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" id="showComparison" class="w-4 h-4" onchange="toggleComparisonVisibility()">
+                        <span class="text-lg font-bold"> פדיונות 💱</span>
+                    </label>
+                </div>
+            </div>
+            
+<div id="redemptionsContainer" style="display: none;" class="space-y-3">
+    <div class="redemption-row">
+        <div class="comparison-group">
+            <input type="number" class="redemption-year w-full border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none" min="1" placeholder="שנת פדיון">
+        </div>
+        <div class="comparison-group">
+            <div class="input-with-icon">
+                <input type="text" class="redemption-amount w-full border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none" onchange="formatNumber(this)" placeholder="סכום פדיון">
+            </div>
+        </div>
+        <div class="comparison-group">
+            <select class="redemption-method w-full border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                <option value="FIFO">FIFO - ראשון נכנס ראשון יוצא</option>
+                <option value="LIFO">LIFO - אחרון נכנס ראשון יוצא</option>
+                <option value="balanced">מאוזן</option>
+            </select>
+        </div>
+        <button onclick="addRedemptionRow()" class="action-button add-button">+</button>
+        <button onclick="removeRedemptionRow(this)" class="action-button remove-button" style="display:none;">-</button>
+    </div>
+</div>
+        <!-- כפתורי פעולה -->
+        <div class="flex justify-center gap-4 my-6">
+            <button onclick="calculateInvestment()" class="btn btn-primary text-lg py-3 px-8 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all">
+                חשב 🚀
+            </button>
+            <button onclick="resetCalculator()" class="btn btn-secondary text-lg py-3 px-8">
+                איפוס ↺
+            </button>
+        </div>
+
+        <!-- אזור תוצאות -->
+        <div class="bg-white rounded-lg shadow-sm p-4 mb-4">
+            <h2 class="text-xl font-bold mb-4">תוצאות החישוב 💰</h2>
+            
+            <!-- קופסאות תוצאה -->
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-4">
+                <div class="result-box bg-blue-50" data-tippy-content="הסכום הכולל הצפוי בסוף תקופת ההשקעה כולל רווחים מהון עצמי ומינוף">
+                    <span class="block text-sm text-gray-600">סך ההון הצפוי</span>
+                    <span id="totalCapital" class="text-lg font-bold text-blue-600"></span>
+                </div>
+                
+                <div class="result-box bg-green-50" data-tippy-content="סך כל הרווח מעל ההשקעה המקורית, כולל רווחי מינוף ובניכוי עלויות מימון">
+                    <span class="block text-sm text-gray-600">רווח כולל</span>
+                    <span id="totalProfit" class="text-lg font-bold text-green-600"></span>
+                </div>
+                
+                <div class="result-box bg-purple-50" data-tippy-content="הרווח הנקי שהתקבל מכספי המינוף לאחר ניכוי כל עלויות המימון">
+                    <span class="block text-sm text-gray-600">רווח נטו ממינוף</span>
+                    <span id="leverageProfit" class="text-lg font-bold text-purple-600"></span>
+                </div>
+                
+                <div class="result-box bg-yellow-50" data-tippy-content="סך כל הכספים שהושקעו כולל השקעה ראשונית והפקדות חודשיות">
+                    <span class="block text-sm text-gray-600">סך השקעה</span>
+                    <span id="totalInvestment" class="text-lg font-bold text-yellow-600"></span>
+                </div>
+                
+                <div class="result-box bg-red-50" data-tippy-content="סך כל תשלומי הריבית על ההלוואה לאורך התקופה">
+                    <span class="block text-sm text-gray-600">עלויות מימון</span>
+                    <span id="financingCosts" class="text-lg font-bold text-red-600"></span>
+                </div>
+                
+                <div class="result-box bg-indigo-50" data-tippy-content="התשואה השנתית הממוצעת בהתחשב בכל התזרימים, כולל מינוף ועלויות">
+                    <span class="block text-sm text-gray-600">תשואה אפקטיבית</span>
+                    <span id="effectiveRate" class="text-lg font-bold text-indigo-600"></span>
+                </div>
+            </div>
+            
+            <!-- טבלת תוצאות -->
+            <div class="overflow-x-auto">
+                <table class="min-w-full">
+                    <thead>
+                        <tr>
+                            <th rowspan="2" class="text-sm py-2 px-2">שנה</th>
+                            <th colspan="2" class="text-sm py-2 px-2 border-l bg-gray-50">השקעה מקורית</th>
+                            <th colspan="2" class="text-sm py-2 px-2 border-l bg-gray-50">השקעה ממונפת</th>
+                            <th colspan="3" class="text-sm py-2 px-2 border-l bg-gray-50">התחייבויות</th>
+                            <th rowspan="2" class="text-sm py-2 px-2">מרווח</th>
+                            <th rowspan="2" class="text-sm py-2 px-2">סה"כ</th>
+                        </tr>
+                        <tr>
+                            <th class="text-sm py-2 px-2">השקעה</th>
+                            <th class="text-sm py-2 px-2 border-l">רווח</th>
+                            <th class="text-sm py-2 px-2">השקעה</th>
+                            <th class="text-sm py-2 px-2 border-l">רווח</th>
+                            <th class="text-sm py-2 px-2">יתרת הלוואה</th>
+                            <th class="text-sm py-2 px-2">החזר קרן</th>
+                            <th class="text-sm py-2 px-2 border-l">החזר ריבית</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultsTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- גרף -->
+        <div class="bg-white rounded-lg shadow-sm p-4 mb-4">
+            <h2 class="text-xl font-bold mb-3">התפתחות ההשקעה 📊</h2>
+            <div class="flex gap-3 mb-3">
+                <button onclick="toggleChartType('line')" class="btn btn-primary text-sm" id="lineChartBtn">
+                    גרף קווי 📈
+                </button>
+                <button onclick="toggleChartType('bar')" class="btn btn-primary text-sm" id="barChartBtn">
+                    גרף עמודות 📊
+                </button>
+                <button onclick="toggleChartType('stacked')" class="btn btn-primary text-sm" id="stackedChartBtn">
+                    גרף מצטבר 📚
+                </button>
+            </div>
+            <div class="chart-container">
+                <canvas id="investmentChart"></canvas>
+            </div>
+        </div>
+
+        <!-- סיכום השקעה -->
+        <div class="bg-white rounded-lg shadow-sm p-4 mb-4">
+            <h2 class="text-xl font-bold mb-3">סיכום השקעה 💡</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="investmentSummary">
+                <!-- תוכן יתווסף דינמית -->
+            </div>
+        </div>
+
+        <!-- כפתורי ייצוא -->
+        <div class="flex justify-center gap-4 mt-4">
+            <button onclick="exportToPDF()" class="btn bg-red-500 hover:bg-red-600 text-white">
+                ייצא ל-PDF 📑
+            </button>
+            <button onclick="exportToExcel()" class="btn bg-green-500 hover:bg-green-600 text-white">
+                ייצא לאקסל 📊
+            </button>
+        </div>
+
+        <p class="text-center text-gray-500 text-xs mt-4">כל הזכויות שמורות © 2024</p>
+    </div>
+<script>
+// בתחילת קובץ הסקריפט, ליד שאר המשתנים הגלובליים
+function toggleAdvancedSection() {
+    const section = document.getElementById('advancedSection');
+    const buttonText = document.getElementById('toggleButtonText');
+    const icon = document.getElementById('toggleIcon');
+    
+    // שדות להפעלה/נעילה
+    const initialInvestmentField = document.getElementById('initialInvestment');
+    const monthlyInvestmentField = document.getElementById('monthlyInvestment');
+    
+    isAdvancedMode = !isAdvancedMode;
+    
+    if (isAdvancedMode) {
+        // פתיחת החלק המתקדם
+        section.classList.remove('hidden');
+        section.style.removeProperty('display');
+        section.style.opacity = '1';
+        section.style.maxHeight = '2000px';
+        buttonText.textContent = 'הסתר';
+        icon.style.transform = 'rotate(180deg)';
+        
+        // נעילת השדות הבסיסיים
+        initialInvestmentField.disabled = true;
+        monthlyInvestmentField.disabled = true;
+        initialInvestmentField.classList.add('bg-gray-100');
+        monthlyInvestmentField.classList.add('bg-gray-100');
+        
+        // העתקת ערכים למצב המתקדם
+        updateInitialValues();
+    } else {
+        // סגירת החלק המתקדם
+        section.style.opacity = '0';
+        section.style.maxHeight = '0';
+        buttonText.textContent = 'הצג';
+        icon.style.transform = 'rotate(0deg)';
+        
+        // שחרור נעילת השדות הבסיסיים
+        initialInvestmentField.disabled = false;
+        monthlyInvestmentField.disabled = false;
+        initialInvestmentField.classList.remove('bg-gray-100');
+        monthlyInvestmentField.classList.remove('bg-gray-100');
+        
+        setTimeout(() => {
+            section.classList.add('hidden');
+            section.style.display = 'none';
+        }, 300);
+    }
+    
+    // עדכון החישוב
+    calculateInvestment();
+}
+
+// עדכון ב-DOMContentLoaded
+document.addEventListener('DOMContentLoaded', function() {
+    // האזנה לשינויים בשדות הבסיסיים
+    document.getElementById('initialInvestment').addEventListener('change', () => {
+        if (!isAdvancedMode) {
+            calculateInvestment();
+        }
+    });
+    
+    document.getElementById('monthlyInvestment').addEventListener('change', () => {
+        if (!isAdvancedMode) {
+            calculateInvestment();
+        }
+    });
+});
+
+// פונקציה לעדכון הערכים ההתחלתיים בנתוני אמת
+function updateInitialValues() {
+    const initialInvestment = parseFloat(document.getElementById('initialInvestment').value.replace(/[^\d.-]/g, '')) || 0;
+    const monthlyInvestment = parseFloat(document.getElementById('monthlyInvestment').value.replace(/[^\d.-]/g, '')) || 0;
+    
+    // הוספת שורת מוצר ראשונה עם הערכים הבסיסיים
+    if (document.querySelectorAll('#productsContainer .data-row').length === 1) {
+        const firstRow = document.querySelector('#productsContainer .data-row');
+        if (!firstRow.querySelector('.savings-amount').value) {
+            firstRow.querySelector('.savings-amount').value = initialInvestment;
+        }
+    }
+    
+    // הוספת הפקדה חודשית ראשונה
+    if (document.querySelectorAll('#monthlyDepositsContainer .data-row').length === 1) {
+        const firstDeposit = document.querySelector('#monthlyDepositsContainer .data-row');
+        if (!firstDeposit.querySelector('.deposit-amount').value) {
+            firstDeposit.querySelector('.deposit-amount').value = monthlyInvestment;
+        }
+    }
+}
+
+    // משתנים גלובליים
+    let myChart = null;
+    let monthlyData = [];
+    let chartType = 'line';
+    let selectedProducts = new Set();
+    let availableAmount = 0;
+    let totalDeposits = 0;
+    let isAdvancedMode = false;
+
+    // אתחול טולטיפים
+    tippy('[data-tippy-content]', {
+        theme: 'custom',
+        placement: 'top',
+        animation: 'scale',
+        arrow: true,
+        allowHTML: true
+    });
+
+    // פונקציות עזר לעיצוב מספרים
+    function formatCurrency(amount) {
+        return new Intl.NumberFormat('he-IL', { 
+            style: 'currency', 
+            currency: 'ILS',
+            maximumFractionDigits: 0 
+        }).format(amount);
+    }
+
+    function formatNumber(input) {
+        let value = input.value.replace(/[^\d.-]/g, '');
+        value = parseFloat(value) || 0;
+        input.value = formatCurrency(value);
+        return value;
+    }
+
+    function formatPercentage(input) {
+        let value = input.value.replace(/[^\d.-]/g, '');
+        value = parseFloat(value) || 0;
+        input.value = value + '%';
+        return value;
+    }
+
+    // ניהול נתוני אמת
+function updateTotalInvestment() {
+    // בודק אם במצב מתקדם
+    if (!isAdvancedMode) return;
+    
+    let total = 0;
+    document.querySelectorAll('#productsContainer .savings-amount').forEach(input => {
+        const value = parseFloat(input.value.replace(/[^\d.-]/g, '')) || 0;
+        total += value;
+    });
+    
+    document.getElementById('initialInvestment').value = formatCurrency(total);
+    updateLoanAmount();
+}
+
+// עדכון המאזינים בטעינת הדף
+document.addEventListener('DOMContentLoaded', function() {
+    updateLoanAmount();
+    updateSelectedProducts();
+    
+    // מאזינים לשדות הבסיסיים
+    document.getElementById('initialInvestment').addEventListener('change', function() {
+        formatNumber(this);
+        if (!isAdvancedMode) {
+            updateLoanAmount();
+        }
+    });
+    
+    document.getElementById('monthlyInvestment').addEventListener('change', function() {
+        formatNumber(this);
+        if (!isAdvancedMode) {
+            calculateInvestment();
+        }
+    });
+});
+
+function addProduct() {
+    const container = document.getElementById('productsContainer');
+    const template = container.querySelector('.data-row').cloneNode(true);
+    
+    template.querySelectorAll('input').forEach(input => input.value = '');
+    template.querySelector('.product-type').selectedIndex = 0;
+    template.querySelector('button[onclick="addProduct()"]').style.display = 'none';
+    template.querySelector('button[onclick="removeProduct(this)"]').style.display = 'block';
+    
+    // הוספת מאזין לשינויים בבחירת המוצר
+    template.querySelector('.product-type').addEventListener('change', updateSelectedProducts);
+    
+    const liquiditySelect = template.querySelector('.liquidity');
+    const liquidityYears = template.querySelector('.years-to-liquidity');
+    liquiditySelect.onchange = function() {
+        liquidityYears.style.display = this.value === 'no' ? 'block' : 'none';
+    };
+    
+    container.appendChild(template);
+    updateSelectedProducts();
+    return false;
+}
+
+    function removeProduct(btn) {
+        const row = btn.closest('.data-row');
+        if (document.querySelectorAll('#productsContainer .data-row').length > 1) {
+            row.remove();
+            updateSelectedProducts();
+            updateTotalInvestment();
+        }
+    }
+
+    function updateCashflow() {
+        const income = parseFloat(document.getElementById('totalIncome').value.replace(/[^\d.-]/g, '')) || 0;
+        const expense = parseFloat(document.getElementById('totalExpense').value.replace(/[^\d.-]/g, '')) || 0;
+        const availableCashFlow = income - expense;
+        
+        const element = document.getElementById('availableCashFlow');
+        element.textContent = formatCurrency(availableCashFlow);
+        element.className = availableCashFlow >= 0 ? 'font-bold text-green-600' : 'font-bold text-red-600';
+        
+        updateInvestmentAmount();
+    }
+
+    function updateInvestmentAmount() {
+        const cashFlow = parseFloat(document.getElementById('availableCashFlow').textContent.replace(/[^\d.-]/g, '')) || 0;
+        const allocation = parseFloat(document.getElementById('investmentAllocation').value) || 0;
+        
+        availableAmount = Math.round(cashFlow * (allocation / 100));
+        document.getElementById('investmentAmount').textContent = formatCurrency(availableAmount);
+        document.getElementById('monthlyInvestment').value = formatCurrency(availableAmount);
+        document.getElementById('availableForDeposits').textContent = formatCurrency(availableAmount);
+        
+        validateAllDeposits();
+    }
+
+    function validateDeposit(input) {
+        const amount = parseFloat(input.value.replace(/[^\d.-]/g, '')) || 0;
+        const row = input.closest('.data-row');
+        
+        totalDeposits = Array.from(document.querySelectorAll('.deposit-amount'))
+            .reduce((sum, input) => sum + (parseFloat(input.value.replace(/[^\d.-]/g, '')) || 0), 0);
+        
+        const warning = row.querySelector('.deposit-warning') || document.createElement('div');
+        warning.className = 'text-sm text-red-600 mt-1';
+        
+        if (totalDeposits > availableAmount) {
+            warning.textContent = 'חריגה מהסכום הזמין להשקעה';
+            if (!row.querySelector('.deposit-warning')) {
+                row.appendChild(warning);
+            }
+            input.classList.add('border-red-500');
+        } else {
+            if (row.querySelector('.deposit-warning')) {
+                row.querySelector('.deposit-warning').remove();
+            }
+            input.classList.remove('border-red-500');
+        }
+        
+        const statusClass = totalDeposits > availableAmount ? 'text-red-600' : 'text-green-600';
+        document.getElementById('totalDepositsDisplay').innerHTML = 
+            `<span class="${statusClass}">סה"כ הפקדות: ${formatCurrency(totalDeposits)} מתוך ${formatCurrency(availableAmount)}</span>`;
+    }
+
+    function validateAllDeposits() {
+        document.querySelectorAll('.deposit-amount').forEach(input => validateDeposit(input));
+    }
+
+    function updateSelectedProducts() {
+        selectedProducts.clear();
+        document.querySelectorAll('#productsContainer .product-type').forEach(select => {
+            if (select.value) {
+                selectedProducts.add(select.value);
+            }
+        });
+        updateDepositProductOptions();
+    }
+
+function updateDepositProductOptions() {
+    const depositSelects = document.querySelectorAll('#monthlyDepositsContainer .deposit-product');
+    depositSelects.forEach(select => {
+        const currentValue = select.value; // שומר את הערך הנוכחי
+        select.innerHTML = '<option value="">בחר מכשיר</option>'; // מאפס את האפשרויות
+        selectedProducts.forEach(product => {
+            const option = document.createElement('option');
+            option.value = product;
+            option.textContent = getProductName(product);
+            select.appendChild(option);
+        });
+        select.value = currentValue; // משחזר את הבחירה הקודמת אם אפשר
+    });
+}
+    function getProductName(value) {
+        const productMap = {
+            "keren_hishtalmut_sakhir": "קרן השתלמות שכיר",
+            "keren_hishtalmut_atzmai": "קרן השתלמות עצמאי",
+            "kupat_gemel": "קופת גמל",
+            "kupat_gemel_lehashkaa": "קופת גמל להשקעה",
+            "keren_pensia": "קרן פנסיה",
+            "bituach_menahalim": "ביטוח מנהלים",
+            "ira": "IRA",
+            "polisa_hisachon": "פוליסת חיסכון",
+            "current_account": "עו\"ש",
+            "fixed_deposit": "פק\"מ",
+            "money_market_fund": "קרן כספית",
+            "advised_portfolio": "תיק מיועץ",
+            "managed_portfolio": "תיק מנוהל"
+        };
+        return productMap[value] || value;
+    }
+
+    function addDeposit() {
+        const container = document.getElementById('monthlyDepositsContainer');
+        const template = container.querySelector('.data-row').cloneNode(true);
+        
+        template.querySelectorAll('input').forEach(input => input.value = '');
+        template.querySelector('.deposit-product').selectedIndex = 0;
+        template.querySelector('button[onclick="addDeposit()"]').style.display = 'none';
+        template.querySelector('button[onclick="removeDeposit(this)"]').style.display = 'block';
+        
+        container.appendChild(template);
+        updateDepositProductOptions();
+        return false;
+    }
+
+    function removeDeposit(btn) {
+        const row = btn.closest('.data-row');
+        if (document.querySelectorAll('#monthlyDepositsContainer .data-row').length > 1) {
+            row.remove();
+            validateAllDeposits();
+        }
+    }
+
+    function toggleComparisonVisibility() {
+        const container = document.getElementById('redemptionsContainer');
+        const isVisible = document.getElementById('showComparison').checked;
+        container.style.display = isVisible ? 'block' : 'none';
+
+        if (isVisible && container.children.length === 0) {
+            addRedemptionRow();
+        }
+    }
+
+    function addRedemptionRow() {
+        const container = document.getElementById('redemptionsContainer');
+        const template = container.querySelector('.redemption-row')?.cloneNode(true) || 
+            createNewRedemptionRow();
+        
+        if (container.querySelector('.redemption-row')) {
+            template.querySelector('button[onclick="addRedemptionRow()"]').style.display = 'none';
+            template.querySelector('button[onclick="removeRedemptionRow(this)"]').style.display = 'block';
+        }
+        
+        template.querySelectorAll('input').forEach(input => {
+            if (input.type === 'number') input.value = '';
+            else input.value = input.classList.contains('redemption-amount') ? '0 ₪' : '';
+        });
+        template.querySelector('.redemption-method').selectedIndex = 0;
+        
+        container.appendChild(template);
+        return false;
+    }
+
+function createNewRedemptionRow() {
+    const row = document.createElement('div');
+    row.className = 'redemption-row';
+    row.innerHTML = `
+        <div class="comparison-group">
+            <input type="number" class="redemption-year w-full border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none" min="1" placeholder="שנת פדיון">
+        </div>
+        <div class="comparison-group">
+            <div class="input-with-icon">
+                <input type="text" class="redemption-amount w-full border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none" onchange="formatNumber(this)" placeholder="סכום פדיון">
+            </div>
+        </div>
+        <div class="comparison-group">
+            <select class="redemption-method w-full border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                <option value="FIFO">FIFO - ראשון נכנס ראשון יוצא</option>
+                <option value="LIFO">LIFO - אחרון נכנס ראשון יוצא</option>
+                <option value="balanced">מאוזן</option>
+            </select>
+        </div>
+        <button onclick="addRedemptionRow()" class="action-button add-button">+</button>
+        <button onclick="removeRedemptionRow(this)" class="action-button remove-button">-</button>
+    `;
+    return row;
+}
+
+function removeRedemptionRow(btn) {
+    const container = document.getElementById('redemptionsContainer');
+    const rows = container.querySelectorAll('.redemption-row');
+    if (rows.length > 1 && !btn.closest('.redemption-row').matches(':first-child')) {
+        btn.closest('.redemption-row').remove();
+    }
+}
+function calculateInvestment() {
+        // קריאת נתוני הקלט
+        const initialInvestment = parseFloat(document.getElementById('initialInvestment').value.replace(/[^\d.-]/g, '')) || 0;
+        const monthlyInvestment = parseFloat(document.getElementById('monthlyInvestment').value.replace(/[^\d.-]/g, '')) || 0;
+        const investmentYears = parseInt(document.getElementById('investmentYears').value) || 1;
+        const annualReturnRate = parseFloat(document.getElementById('returnRate').value.replace(/[^\d.-]/g, '')) / 100 || 0;
+        const loanPercentage = parseFloat(document.getElementById('loanPercentage').value) || 0;
+        const loanYears = parseInt(document.getElementById('loanYears').value) || 1;
+        const loanType = document.getElementById('loanType').value;
+        const annualLoanInterest = parseFloat(document.getElementById('loanInterest').value.replace(/[^\d.-]/g, '')) / 100 || 0;
+        const annualLoanReturnRate = parseFloat(document.getElementById('loanReturnRate').value.replace(/[^\d.-]/g, '')) / 100 || 0;
+        const compoundLoanReturn = document.getElementById('compoundLoanReturn').value === 'true';
+        const inflationRate = parseFloat(document.getElementById('inflationRate').value.replace(/[^\d.-]/g, '')) / 100 || 0;
+
+        // איסוף פדיונות
+        const redemptions = [];
+        if (document.getElementById('showComparison')?.checked) {
+            document.querySelectorAll('.redemption-row').forEach(row => {
+                const year = parseInt(row.querySelector('.redemption-year').value) || 0;
+                const amount = parseFloat(row.querySelector('.redemption-amount').value.replace(/[^\d.-]/g, '')) || 0;
+                const method = row.querySelector('.redemption-method').value;
+                if (year > 0 && amount > 0) {
+                    redemptions.push({ year, amount, method });
+                }
+            });
+        }
+
+        // חישובי בסיס
+        const loanAmount = initialInvestment * (loanPercentage / 100);
+        let balance = initialInvestment;
+        let leveragedBalance = loanAmount;
+        let remainingLoan = loanAmount;
+        let totalInterestPaid = 0;
+
+        // איפוס נתונים
+        monthlyData = [];
+        let yearlyData = [];
+        
+        const monthlyReturnRate = Math.pow(1 + annualReturnRate, 1/12) - 1;
+        const monthlyLoanReturnRate = Math.pow(1 + annualLoanReturnRate, 1/12) - 1;
+        const monthlyInflationRate = inflationRate / 12;
+
+        // חישובים חודשיים
+        for (let year = 1; year <= investmentYears; year++) {
+            let yearlyOriginalReturn = 0;
+            let yearlyLeveragedReturn = 0;
+            let yearlyLoanPayment = 0;
+            let yearlyInterestPayment = 0;
+            let yearlyPrincipalPayment = 0;
+            let yearlyRedemptionAmount = 0;
+            let yearlyRedemptionTax = 0;
+
+            // בדיקת פדיונות לשנה הנוכחית
+            const currentRedemptions = redemptions.filter(r => r.year === year);
+            const originalInvestmentAtStartOfYear = balance;
+            const leveragedInvestmentAtStartOfYear = leveragedBalance;
+
+            for (let month = 1; month <= 12; month++) {
+                // חישוב תשואה על ההון העצמי
+                const monthlyReturn = balance * monthlyReturnRate;
+                balance += monthlyReturn + monthlyInvestment;
+                yearlyOriginalReturn += monthlyReturn;
+
+                // חישוב תשואה על המינוף
+                if (leveragedBalance > 0) {
+                    const leveragedReturn = compoundLoanReturn ? 
+                        leveragedBalance * monthlyLoanReturnRate : 
+                        loanAmount * monthlyLoanReturnRate;
+                    leveragedBalance += leveragedReturn;
+                    yearlyLeveragedReturn += leveragedReturn;
+                }
+
+                // חישוב תשלומי הלוואה
+                if (remainingLoan > 0 && year <= loanYears) {
+                    const monthlyInterest = remainingLoan * (annualLoanInterest / 12);
+                    let monthlyPrincipalPayment = 0;
+
+                    if (loanType === 'balloon') {
+                        // תשלום ריבית בלבד
+                        yearlyInterestPayment += monthlyInterest;
+                        if (year === loanYears && month === 12) {
+                            // תשלום הקרן בסוף התקופה
+                            monthlyPrincipalPayment = remainingLoan;
+                            yearlyPrincipalPayment += monthlyPrincipalPayment;
+                        }
+                    } else {
+                        // חישוב תשלום שפיצר
+                        const totalPayments = loanYears * 12;
+                        const monthlyRate = annualLoanInterest / 12;
+                        const monthlyPayment = (loanAmount * monthlyRate * Math.pow(1 + monthlyRate, totalPayments)) /
+                            (Math.pow(1 + monthlyRate, totalPayments) - 1);
+                        monthlyPrincipalPayment = monthlyPayment - monthlyInterest;
+                        yearlyInterestPayment += monthlyInterest;
+                        yearlyPrincipalPayment += monthlyPrincipalPayment;
+                    }
+
+                    remainingLoan = Math.max(0, remainingLoan - monthlyPrincipalPayment);
+                    yearlyLoanPayment += monthlyPrincipalPayment + monthlyInterest;
+                    leveragedBalance = Math.max(0, leveragedBalance - monthlyPrincipalPayment);
+                }
+
+                // טיפול בפדיונות בתחילת השנה
+                if (month === 1 && currentRedemptions.length > 0) {
+                    for (const redemption of currentRedemptions) {
+                        const state = {
+                            balance,
+                            leveragedBalance,
+                            originalInvestmentAtStartOfYear,
+                            leveragedInvestmentAtStartOfYear,
+                            yearlyRedemptionAmount,
+                            yearlyRedemptionTax
+                        };
+
+                        handleRedemption(redemption, state);
+                        
+                        balance = state.balance;
+                        leveragedBalance = state.leveragedBalance;
+                        yearlyRedemptionAmount = state.yearlyRedemptionAmount;
+                        yearlyRedemptionTax = state.yearlyRedemptionTax;
+                    }
+                }
+
+                // התאמה לאינפלציה
+                if (inflationRate > 0) {
+                    const totalBalance = balance + leveragedBalance;
+                    const inflationEffect = totalBalance * monthlyInflationRate;
+                    balance -= inflationEffect * (balance / totalBalance);
+                    leveragedBalance -= inflationEffect * (leveragedBalance / totalBalance);
+                }
+
+                // שמירת נתונים חודשיים
+                monthlyData.push({
+                    year,
+                    month,
+                    balance,
+                    leveragedBalance,
+                    remainingLoan,
+                    monthlyReturn,
+                    leveragedReturn: yearlyLeveragedReturn / 12,
+                    monthlyLoanPayment: yearlyLoanPayment / 12,
+                    monthlyInterest: yearlyInterestPayment / 12,
+                    monthlyPrincipalPayment: yearlyPrincipalPayment / 12,
+                    redemptionAmount: yearlyRedemptionAmount,
+                    redemptionTax: yearlyRedemptionTax,
+                    totalBalance: balance + leveragedBalance
+                });
+            }
+
+            // שמירת נתונים שנתיים
+            yearlyData.push({
+                year,
+                originalBalance: balance,
+                leveragedBalance,
+                remainingLoan,
+                yearlyOriginalReturn,
+                yearlyLeveragedReturn,
+                yearlyLoanPayment,
+                yearlyInterestPayment,
+                yearlyPrincipalPayment,
+                yearlyRedemptionAmount,
+                yearlyRedemptionTax,
+                totalBalance: balance + leveragedBalance
+            });
+
+            totalInterestPaid += yearlyInterestPayment;
+        }
+
+        // עדכון התצוגה
+        updateResults(yearlyData);
+        updateChart(yearlyData);
+        updateSummary(yearlyData, totalInterestPaid);
+    }
+
+    function handleRedemption(redemption, state) {
+        let remainingRedemption = redemption.amount;
+        
+        if (redemption.method === 'LIFO') {
+            // Last In First Out - מושך קודם מהרווחים האחרונים
+            const totalGains = state.balance + state.leveragedBalance - 
+                (state.originalInvestmentAtStartOfYear + state.leveragedInvestmentAtStartOfYear);
+            
+            if (totalGains > 0) {
+                const redemptionFromGains = Math.min(remainingRedemption, totalGains);
+                state.yearlyRedemptionTax += redemptionFromGains * 0.25;
+                state.yearlyRedemptionAmount += redemptionFromGains;
+                remainingRedemption -= redemptionFromGains;
+                
+                // חלוקת הרווחים באופן יחסי
+                const balanceRatio = state.balance / (state.balance + state.leveragedBalance);
+                state.balance -= redemptionFromGains * balanceRatio;
+                state.leveragedBalance -= redemptionFromGains * (1 - balanceRatio);
+            }
+            
+            if (remainingRedemption > 0) {
+                const redemptionFromPrincipal = Math.min(remainingRedemption, state.balance);
+                state.yearlyRedemptionAmount += redemptionFromPrincipal;
+                state.balance -= redemptionFromPrincipal;
+                remainingRedemption -= redemptionFromPrincipal;
+            }
+        } else if (redemption.method === 'FIFO') {
+            // First In First Out - מושך קודם מההון העצמי
+            if (remainingRedemption > 0) {
+                const redemptionFromPrincipal = Math.min(remainingRedemption, state.originalInvestmentAtStartOfYear);
+                state.yearlyRedemptionAmount += redemptionFromPrincipal;
+                state.balance -= redemptionFromPrincipal;
+                remainingRedemption -= redemptionFromPrincipal;
+            }
+            
+            if (remainingRedemption > 0) {
+                state.yearlyRedemptionTax += remainingRedemption * 0.25;
+                state.yearlyRedemptionAmount += remainingRedemption;
+                
+                // חלוקת הרווחים באופן יחסי
+                const balanceRatio = state.balance / (state.balance + state.leveragedBalance);
+                state.balance -= remainingRedemption * balanceRatio;
+                state.leveragedBalance -= remainingRedemption * (1 - balanceRatio);
+            }
+        } else {
+            // Balanced - חלוקה יחסית בין ההון העצמי והמינוף
+            const totalBalance = state.balance + state.leveragedBalance;
+            if (totalBalance > 0) {
+                const ratio = redemption.amount / totalBalance;
+                
+                const redemptionFromBalance = state.balance * ratio;
+                const redemptionFromLeveraged = state.leveragedBalance * ratio;
+                
+                // חישוב מס רק על החלק שמעל ההשקעה המקורית
+                const originalBalanceRatio = state.originalInvestmentAtStartOfYear / state.balance;
+                const taxableAmount = redemptionFromBalance * (1 - originalBalanceRatio) + redemptionFromLeveraged;
+                state.yearlyRedemptionTax += taxableAmount * 0.25;
+                
+                state.yearlyRedemptionAmount += redemptionFromBalance + redemptionFromLeveraged;
+                state.balance -= redemptionFromBalance;
+                state.leveragedBalance -= redemptionFromLeveraged;
+            }
+        }
+    }
+function updateResults(yearlyData) {
+        const lastYear = yearlyData[yearlyData.length - 1];
+        const totalRedemptions = yearlyData.reduce((sum, year) => sum + year.yearlyRedemptionAmount, 0);
+        const totalRedemptionTax = yearlyData.reduce((sum, year) => sum + year.yearlyRedemptionTax, 0);
+        const initialInvestment = parseFloat(document.getElementById('initialInvestment').value.replace(/[^\d.-]/g, '')) || 0;
+        const monthlyInvestment = parseFloat(document.getElementById('monthlyInvestment').value.replace(/[^\d.-]/g, '')) || 0;
+        const totalYears = yearlyData.length;
+        const totalDeposits = initialInvestment + (monthlyInvestment * 12 * totalYears);
+        const totalInterestPaid = yearlyData.reduce((sum, year) => sum + year.yearlyInterestPayment, 0);
+
+        // עדכון תיבות תוצאה
+        document.getElementById('totalCapital').textContent = formatCurrency(lastYear.totalBalance + totalRedemptions);
+        document.getElementById('totalProfit').textContent = formatCurrency(lastYear.totalBalance - totalDeposits + totalRedemptions);
+        document.getElementById('leverageProfit').textContent = formatCurrency(lastYear.leveragedBalance - totalInterestPaid);
+        document.getElementById('totalInvestment').textContent = formatCurrency(totalDeposits);
+        document.getElementById('financingCosts').textContent = formatCurrency(totalInterestPaid);
+
+        // חישוב תשואה אפקטיבית
+        const effectiveRate = (Math.pow((lastYear.totalBalance + totalRedemptions) / initialInvestment, 1/totalYears) - 1) * 100;
+        document.getElementById('effectiveRate').textContent = effectiveRate.toFixed(2) + '%';
+
+        // עדכון טבלת תוצאות
+        const tbody = document.getElementById('resultsTableBody');
+        tbody.innerHTML = '';
+
+        yearlyData.forEach((year, index) => {
+            const row = document.createElement('tr');
+            const margin = year.yearlyLeveragedReturn - year.yearlyInterestPayment;
+            const hasPadiah = year.yearlyRedemptionAmount > 0;
+            const isLastLoanYear = year.yearlyPrincipalPayment > 0 && 
+                (index === yearlyData.length - 1 || yearlyData[index + 1].yearlyPrincipalPayment === 0);
+
+            row.className = isLastLoanYear ? 'bg-blue-50' : '';
+            
+            const cells = [
+                { content: year.year, class: hasPadiah ? 'relative' : '' },
+                { content: formatCurrency(year.originalBalance), class: '' },
+                { content: formatCurrency(year.yearlyOriginalReturn), class: 'border-l' },
+                { content: formatCurrency(year.leveragedBalance), class: '' },
+                { content: formatCurrency(year.yearlyLeveragedReturn), class: 'border-l' },
+                { content: formatCurrency(year.remainingLoan), class: '' },
+                { content: formatCurrency(year.yearlyPrincipalPayment), class: '' },
+                { content: formatCurrency(year.yearlyInterestPayment), class: 'border-l' },
+                { content: formatCurrency(margin), class: margin >= 0 ? 'text-green-600' : 'text-red-600' },
+                { content: `${formatCurrency(year.totalBalance)}${
+                    hasPadiah ? `<br><span class="text-sm text-purple-600">פדיון: ${formatCurrency(year.yearlyRedemptionAmount)}</span>` : ''
+                }`, class: 'font-bold' }
+            ];
+
+            row.innerHTML = cells.map(cell => `
+                <td class="p-1.5 text-sm ${cell.class}">${cell.content}</td>
+            `).join('');
+
+            if (hasPadiah) {
+                row.setAttribute('data-tippy-content', `
+                    סכום פדיון: ${formatCurrency(year.yearlyRedemptionAmount)}<br>
+                    מס רווחי הון: ${formatCurrency(year.yearlyRedemptionTax)}<br>
+                    נטו לאחר מס: ${formatCurrency(year.yearlyRedemptionAmount - year.yearlyRedemptionTax)}
+                `);
+                tippy(row, {
+                    theme: 'custom',
+                    allowHTML: true,
+                    placement: 'left'
+                });
+            }
+            
+            tbody.appendChild(row);
+        });
+
+        // הוספת שורת סיכום
+        const summaryRow = document.createElement('tr');
+        summaryRow.className = 'bg-gray-100 font-bold';
+        const totalOriginalReturn = yearlyData.reduce((sum, year) => sum + year.yearlyOriginalReturn, 0);
+        const totalLeveragedReturn = yearlyData.reduce((sum, year) => sum + year.yearlyLeveragedReturn, 0);
+        const totalPrincipalPaid = yearlyData.reduce((sum, year) => sum + year.yearlyPrincipalPayment, 0);
+
+        summaryRow.innerHTML = `
+            <td class="p-1.5 text-sm">סה"כ</td>
+            <td class="p-1.5 text-sm">${formatCurrency(lastYear.originalBalance)}</td>
+            <td class="p-1.5 text-sm border-l">${formatCurrency(totalOriginalReturn)}</td>
+            <td class="p-1.5 text-sm">${formatCurrency(lastYear.leveragedBalance)}</td>
+            <td class="p-1.5 text-sm border-l">${formatCurrency(totalLeveragedReturn)}</td>
+            <td class="p-1.5 text-sm">${formatCurrency(lastYear.remainingLoan)}</td>
+            <td class="p-1.5 text-sm">${formatCurrency(totalPrincipalPaid)}</td>
+            <td class="p-1.5 text-sm border-l">${formatCurrency(totalInterestPaid)}</td>
+            <td class="p-1.5 text-sm">${formatCurrency(totalLeveragedReturn - totalInterestPaid)}</td>
+            <td class="p-1.5 text-sm">${formatCurrency(lastYear.totalBalance)}${
+                totalRedemptions > 0 ? `<br><span class="text-xs text-purple-600">סה"כ פדיונות: ${formatCurrency(totalRedemptions)}</span>` : ''
+            }</td>
+        `;
+        tbody.appendChild(summaryRow);
+    }
+
+    function updateChart(yearlyData) {
+        const ctx = document.getElementById('investmentChart').getContext('2d');
+        if (myChart) {
+            myChart.destroy();
+        }
+
+        const labels = yearlyData.map(d => `שנה ${d.year}`);
+        const totalRedemptions = yearlyData.reduce((sum, year) => sum + year.yearlyRedemptionAmount, 0);
+
+        let datasets = [];
+        
+        if (chartType === 'stacked') {
+            datasets = [
+                {
+                    label: 'הפקדה ראשונית',
+                    data: yearlyData.map(d => parseFloat(document.getElementById('initialInvestment').value.replace(/[^\d.-]/g, ''))),
+                    backgroundColor: 'rgb(59, 130, 246)',
+                    stack: 'הון עצמי'
+                },
+                {
+                    label: 'הפקדות חודשיות',
+                    data: yearlyData.map((d, i) => parseFloat(document.getElementById('monthlyInvestment').value.replace(/[^\d.-]/g, '')) * 12 * (i + 1)),
+                    backgroundColor: 'rgb(147, 197, 253)',
+                    stack: 'הון עצמי'
+                },
+                {
+                    label: 'רווחים מהון עצמי',
+                    data: yearlyData.map(d => d.yearlyOriginalReturn),
+                    backgroundColor: 'rgb(16, 185, 129)',
+                    stack: 'רווחים'
+                },
+                {
+                    label: 'רווחים ממינוף',
+                    data: yearlyData.map(d => d.yearlyLeveragedReturn),
+                    backgroundColor: 'rgb(5, 150, 105)',
+                    stack: 'רווחים'
+                }
+            ];
+
+            if (totalRedemptions > 0) {
+                datasets.push({
+                    label: 'פדיונות',
+                    data: yearlyData.map(d => -d.yearlyRedemptionAmount),
+                    backgroundColor: 'rgb(124, 58, 237)',
+                    stack: 'פדיונות'
+                });
+            }
+
+            datasets.push({
+                label: 'הלוואה',
+                data: yearlyData.map(d => -d.remainingLoan),
+                backgroundColor: 'rgb(239, 68, 68)',
+                stack: 'התחייבויות'
+            });
+        } else {
+            datasets = [
+                {
+                    label: 'הון עצמי',
+                    data: yearlyData.map(d => d.originalBalance),
+                    borderColor: 'rgb(59, 130, 246)',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    fill: true
+                },
+                {
+                    label: 'מינוף',
+                    data: yearlyData.map(d => d.leveragedBalance),
+                    borderColor: 'rgb(16, 185, 129)',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    fill: true
+                }
+            ];
+
+            if (totalRedemptions > 0) {
+                datasets.push({
+                    label: 'פדיונות',
+                    data: yearlyData.map(d => -d.yearlyRedemptionAmount),
+                    borderColor: 'rgb(124, 58, 237)',
+                    backgroundColor: 'rgba(124, 58, 237, 0.1)',
+                    type: 'bar'
+                });
+            }
+
+            datasets.push({
+                label: 'הלוואה',
+                data: yearlyData.map(d => -d.remainingLoan),
+                borderColor: 'rgb(239, 68, 68)',
+                backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                fill: true
+            });
+        }
+
+        myChart = new Chart(ctx, {
+            type: chartType === 'stacked' ? 'bar' : chartType,
+            data: { labels, datasets },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        rtl: true,
+                        labels: {
+                            font: { family: 'Rubik' },
+                            usePointStyle: true,
+                            padding: 20
+                        }
+                    },
+                    tooltip: {
+                        rtl: true,
+                        titleAlign: 'right',
+                        bodyAlign: 'right',
+                        callbacks: {
+                            label: (context) => {
+                                return context.dataset.label + ': ' + formatCurrency(Math.abs(context.raw));
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        stacked: chartType === 'stacked',
+                        grid: {
+                            borderDash: [5, 5]
+                        },
+                        ticks: {
+                            callback: (value) => formatCurrency(value),
+                            font: { family: 'Rubik' }
+                        }
+                    },
+                    x: {
+                        stacked: chartType === 'stacked',
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            font: { family: 'Rubik' }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function toggleChartType(type) {
+        chartType = type;
+        document.querySelectorAll('.btn-primary').forEach(btn => btn.classList.remove('bg-blue-600'));
+        document.getElementById(`${type}ChartBtn`).classList.add('bg-blue-600');
+        calculateInvestment();
+    }
+
+    function updateSummary(yearlyData, totalInterestPaid) {
+        const lastYear = yearlyData[yearlyData.length - 1];
+        const initialInvestment = parseFloat(document.getElementById('initialInvestment').value.replace(/[^\d.-]/g, '')) || 0;
+        const monthlyInvestment = parseFloat(document.getElementById('monthlyInvestment').value.replace(/[^\d.-]/g, '')) || 0;
+        const totalDeposits = initialInvestment + (monthlyInvestment * 12 * yearlyData.length);
+        const totalRedemptions = yearlyData.reduce((sum, year) => sum + year.yearlyRedemptionAmount, 0);
+        const totalRedemptionTax = yearlyData.reduce((sum, year) => sum + year.yearlyRedemptionTax, 0);
+        const totalCapital = lastYear.totalBalance + totalRedemptions;
+
+        const summary = `
+            <div class="bg-blue-50 p-4 rounded-lg" data-tippy-content="ניתוח מפורט של ביצועי ההשקעה">
+                <h3 class="font-bold text-lg mb-2">ביצועי השקעה 📈</h3>
+                <p>תשואה שנתית ממוצעת: ${((Math.pow(totalCapital / initialInvestment, 1/yearlyData.length) - 1) * 100).toFixed(2)}%</p>
+                <p>תשואה מצטברת: ${((totalCapital / initialInvestment - 1) * 100).toFixed(2)}%</p>
+                <p>סך רווח מצטבר: ${formatCurrency(totalCapital - totalDeposits)}</p>
+                ${totalRedemptions > 0 ? `
+                    <p>סך פדיונות: ${formatCurrency(totalRedemptions)}</p>
+                    <p>סך מס רווחי הון: ${formatCurrency(totalRedemptionTax)}</p>
+                    <p>נטו מפדיונות: ${formatCurrency(totalRedemptions - totalRedemptionTax)}</p>
+                ` : ''}
+            </div>
+            <div class="bg-green-50 p-4 rounded-lg" data-tippy-content="ניתוח כדאיות המינוף">
+                <h3 class="font-bold text-lg mb-2">ניתוח מינוף 💰</h3>
+                <p>רווח ממינוף: ${formatCurrency(lastYear.leveragedBalance - totalInterestPaid)}</p>
+                <p>עלויות מימון כוללות: ${formatCurrency(totalInterestPaid)}</p>
+                <p>תשואה על המינוף: ${((lastYear.leveragedBalance / totalInterestPaid - 1) * 100).toFixed(2)}%</p>
+            </div>
+            <div class="bg-purple-50 p-4 rounded-lg" data-tippy-content="יחסים פיננסיים חשובים">
+                <h3 class="font-bold text-lg mb-2">יחסים פיננסיים 📊</h3>
+                <p>יחס מינוף: ${(lastYear.leveragedBalance / lastYear.originalBalance).toFixed(2)}</p>
+                <p>כיסוי חוב: ${((lastYear.yearlyOriginalReturn + lastYear.yearlyLeveragedReturn) / yearlyData[yearlyData.length - 1].yearlyInterestPayment).toFixed(2)}</p>
+                <p>ROI כולל: ${((totalCapital - totalDeposits) / totalDeposits * 100).toFixed(2)}%</p>
+            </div>
+        `;
+
+        document.getElementById('investmentSummary').innerHTML = summary;
+
+        // עדכון טולטיפים
+        tippy('[data-tippy-content]', {
+            theme: 'custom',
+            placement: 'top',
+            animation: 'scale',
+            arrow: true,
+            allowHTML: true
+        });
+    }
+
+    // פונקציות ייצוא
+    function exportToPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('landscape');
+        
+        html2canvas(document.querySelector('.main-container')).then(canvas => {
+            const imgData = canvas.toDataURL('image/png');
+            const imgProps = doc.getImageProperties(imgData);
+            const pdfWidth = doc.internal.pageSize.getWidth();
+            const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+            
+            doc.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+            doc.save('investment-calculation.pdf');
+        });
+    }
+
+    function exportToExcel() {
+        const wb = XLSX.utils.book_new();
+        
+        // ייצוא טבלת תוצאות
+        const resultsTable = document.querySelector('table');
+        const ws = XLSX.utils.table_to_sheet(resultsTable, { raw: true });
+        XLSX.utils.book_append_sheet(wb, ws, "תוצאות");
+        
+        // ייצוא נתוני קלט
+        const inputData = [
+            ["נתוני השקעה"],
+            ["סכום השקעה ראשוני", document.getElementById('initialInvestment').value],
+            ["סכום השקעה חודשי", document.getElementById('monthlyInvestment').value],
+            ["שנות השקעה", document.getElementById('investmentYears').value],
+            ["תשואה שנתית", document.getElementById('returnRate').value],
+            [],
+            ["נתוני הלוואה"],
+            ["אחוז הלוואה", document.getElementById('loanPercentage').value + "%"],
+            ["שנות הלוואה", document.getElementById('loanYears').value],
+            ["סוג הלוואה", document.getElementById('loanType').value],
+            ["ריבית הלוואה", document.getElementById('loanInterest').value]
+        ];
+        
+        const wsInput = XLSX.utils.aoa_to_sheet(inputData);
+        XLSX.utils.book_append_sheet(wb, wsInput, "נתוני קלט");
+        
+        XLSX.writeFile(wb, "investment-calculation.xlsx");
+    }
+
+    // אתחול המחשבון
+    document.addEventListener('DOMContentLoaded', function() {
+        updateLoanAmount();
+        updateSelectedProducts();
+	    document.querySelector('#productsContainer .product-type')
+        .addEventListener('change', updateSelectedProducts);
+        
+
+        // אתחול טולטיפים
+        tippy('[data-tippy-content]', {
+            theme: 'custom',
+            placement: 'top',
+            animation: 'scale',
+            arrow: true,
+            allowHTML: true
+        });
+
+        // הוספת מאזינים לשינויים
+        document.querySelectorAll('input, select').forEach(element => {
+            element.addEventListener('change', function() {
+                if (this.id === 'showComparison') {
+                    toggleComparisonVisibility();
+                } else {
+                    updateTotalInvestment();
+                }
+            });
+        });
+
+        // הסתרת אזור נתוני אמת בטעינה
+        document.getElementById('realDataSection').style.display = 'none';
+    });
+
+    function updateLoanAmount() {
+        const initialInvestment = parseFloat(document.getElementById('initialInvestment').value.replace(/[^\d.-]/g, '')) || 0;
+        const loanPercentage = parseFloat(document.getElementById('loanPercentage').value) || 0;
+        const loanAmount = initialInvestment * (loanPercentage / 100);
+        document.getElementById('loanAmount').textContent = `סכום הלוואה: ${formatCurrency(loanAmount)}`;
+    }
+</script>
+</body>
+</html>
